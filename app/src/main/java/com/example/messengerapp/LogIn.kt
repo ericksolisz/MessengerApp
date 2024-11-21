@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -53,7 +54,20 @@ class LogIn : ComponentActivity() {
     }
 
     private fun login(email: String, password: String){
-        ///logic for login
+        ///logic for login (firebase doc)
+        mAuth.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    // Sign in success, update UI with the signed-in user's information
+                    val intent = Intent(this@LogIn, MainActivity::class.java)
+                    startActivity(intent)
+
+                } else {
+                    // If sign in fails, display a message to the user.
+                    Toast.makeText(this@LogIn, "User does not exist", Toast.LENGTH_SHORT).show()
+                }
+            }
+
     }
 }
 
