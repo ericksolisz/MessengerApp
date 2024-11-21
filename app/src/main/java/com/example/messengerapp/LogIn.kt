@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.messengerapp.ui.theme.MessengerAppTheme
+import com.google.firebase.auth.FirebaseAuth
 
 class LogIn : ComponentActivity() {
     private lateinit var edtEmail: EditText
@@ -22,12 +23,16 @@ class LogIn : ComponentActivity() {
     private lateinit var btnLogin: Button
     private lateinit var btnSignUp: Button
 
+    private lateinit var mAuth: FirebaseAuth
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_log_in)
 
+
+        mAuth= FirebaseAuth.getInstance() //Intialice firebas Auth
         edtEmail= findViewById(R.id.edt_email)
         edtPassword= findViewById(R.id.edt_password)
         btnLogin= findViewById(R.id.btn_login)
@@ -38,10 +43,17 @@ class LogIn : ComponentActivity() {
             startActivity(intent)
         }
 
+        btnLogin.setOnClickListener{
+            val email= edtEmail.text.toString()
+            val password = edtPassword.text.toString()
 
 
+            login(email, password);
+        }
+    }
 
-
+    private fun login(email: String, password: String){
+        ///logic for login
     }
 }
 
