@@ -5,7 +5,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
-import androidx.activity.ComponentActivity
+import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,7 +18,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.example.messengerapp.ui.theme.MessengerAppTheme
 import com.google.firebase.auth.FirebaseAuth
 
-class SignUp : ComponentActivity() {
+class SignUp : AppCompatActivity() {
     private lateinit var edtName: EditText
     private lateinit var edtEmail: EditText
     private lateinit var edtPassword: EditText
@@ -29,6 +29,8 @@ class SignUp : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_sing_up)
+
+        supportActionBar?.hide()
 
         mAuth= FirebaseAuth.getInstance() //Intialice firebas Auth
 

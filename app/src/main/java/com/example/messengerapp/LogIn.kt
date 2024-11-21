@@ -5,7 +5,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
-import androidx.activity.ComponentActivity
+import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,7 +18,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.example.messengerapp.ui.theme.MessengerAppTheme
 import com.google.firebase.auth.FirebaseAuth
 
-class LogIn : ComponentActivity() {
+class LogIn : AppCompatActivity() {
     private lateinit var edtEmail: EditText
     private lateinit var edtPassword: EditText
     private lateinit var btnLogin: Button
@@ -31,6 +31,8 @@ class LogIn : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_log_in)
+
+        supportActionBar?.hide()
 
 
         mAuth= FirebaseAuth.getInstance() //Intialice firebas Auth
