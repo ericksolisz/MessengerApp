@@ -8,8 +8,10 @@
         <item name="colorPrimaryDark">@color/green</item>
         <item name="colorAccent">@color/green</item>
 
-        <!-- Personalizaciones adicionales status bar -->
-        <item name="android:statusBarColor" tools:targetApi="21">@color/green</item>
+
+        <!-- StatusBar transparente -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">true</item>
     </style>
 
 </resources>
