@@ -17,6 +17,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.messengerapp.ui.theme.MessengerAppTheme
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 
 class SignUp : AppCompatActivity() {
     private lateinit var edtName: EditText
@@ -24,6 +26,7 @@ class SignUp : AppCompatActivity() {
     private lateinit var edtPassword: EditText
     private lateinit var btnSignUp: Button
     private lateinit var mAuth: FirebaseAuth
+    private lateinit var mDbRef: DatabaseReference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,21 +43,24 @@ class SignUp : AppCompatActivity() {
         btnSignUp= findViewById(R.id.btn_sign_up)
 
         btnSignUp.setOnClickListener{
+            val name = edtName.text.toString()
             val email = edtEmail.text.toString()
             val password = edtPassword.text.toString()
 
-            signUp(email, password)
+            signUp(name, email, password)
         }
     }
 
-    private fun signUp(email: String, password: String){
+    private fun signUp(name:String, email: String, password: String){
         ///logic for crete user(from firebase documentation)
 
         mAuth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     //code for jumping to home
+                    addUserToDatabase(name, email, mAuth.currentUser?.uid!!)
                     val intent = Intent(this@SignUp, MainActivity::class.java)
+                    finish()
                     startActivity(intent)
                 } else {
                     // If sign in fails, display a message to the user.
@@ -63,5 +69,16 @@ class SignUp : AppCompatActivity() {
                 }
             }
     }
+
+    private fun addUserToDatabase(name: String, email: String, uid:String){
+        mDbRef = FirebaseDatabase.getInstance().getReference()
+        mDbRef.child("user").child(uid).setValue(User(name, email, uid))
+
+
+    }
+
+
+
+
 }
 

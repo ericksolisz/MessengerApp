@@ -17,12 +17,12 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_below="@id/app_logo"
-        android:layout_marginTop="10dp"
-        android:hint="Email"
-        android:paddingLeft="12dp"
-        android:background="@drawable/edt_background"
         android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"/>
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="20dp"
+        android:background="@drawable/edt_background"
+        android:hint="Email"
+        android:paddingLeft="12dp" />
 
     <EditText
         android:id="@+id/edt_password"
