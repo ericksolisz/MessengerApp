@@ -71,8 +71,25 @@ class SignUp : AppCompatActivity() {
     }
 
     private fun addUserToDatabase(name: String, email: String, uid:String){
+
+        RSAUtils.generateKeyPair()
+        val publicKeyString = RSAUtils.getPublicKeyAsString()
+        val privateKeyString = RSAUtils.getPrivateKeyAsString()
+
+
+
+
+
         mDbRef = FirebaseDatabase.getInstance().getReference()
-        mDbRef.child("user").child(uid).setValue(User(name, email, uid))
+
+        val user = User(name, email, uid, publicKeyString)
+
+        mDbRef.child("user").child(uid).setValue(user)
+
+
+
+        // Guardar la clave privada localmente en el dispositivo
+        KeyStorage.savePrivateKey(this, privateKeyString)
 
 
     }
@@ -81,4 +98,3 @@ class SignUp : AppCompatActivity() {
 
 
 }
-
