@@ -17,6 +17,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import java.security.PublicKey
 
 class ChatActivity : AppCompatActivity() {
 
@@ -79,11 +80,18 @@ class ChatActivity : AppCompatActivity() {
 
 
             //adding the message to database
-            sendButton.setOnClickListener{
+        sendButton.setOnClickListener {
+            val message = messageBox.text.toString()
 
-                val message = messageBox.text.toString()
-                val messageObject = Message(message, senderUid)
+            // Recuperar clave pública del receptor desde Firebase
+            getPublicKeyOfReceiver(receiverUid!!) { publicKey ->
+                // Cifrar el mensaje usando la clave pública del receptor
+                val encryptedMessage = RSAEncryptionUtil.encryptMessage(message, publicKey)
 
+                // Crear el objeto de mensaje con el mensaje cifrado
+                val messageObject = Message(encryptedMessage, senderUid)
+
+                // Guardar el mensaje cifrado en Firebase
                 mDbRef.child("chats").child(senderRoom!!).child("messages").push()
                     .setValue(messageObject).addOnSuccessListener {
                         mDbRef.child("chats").child(receiverRoom!!).child("messages").push()
@@ -92,4 +100,20 @@ class ChatActivity : AppCompatActivity() {
                 messageBox.setText("")
             }
         }
+
     }
+
+    private fun getPublicKeyOfReceiver(receiverUid: String, onSuccess: (PublicKey) -> Unit) {
+        mDbRef.child("user").child(receiverUid).child("publicKey")
+            .get().addOnSuccessListener { snapshot ->
+                val publicKeyString = snapshot.getValue(String::class.java)
+                if (publicKeyString != null) {
+                    val keyBytes = android.util.Base64.decode(publicKeyString, android.util.Base64.DEFAULT)
+                    val keySpec = java.security.spec.X509EncodedKeySpec(keyBytes)
+                    val publicKey = java.security.KeyFactory.getInstance("RSA").generatePublic(keySpec)
+                    onSuccess(publicKey)
+                }
+            }
+    }
+
+}
