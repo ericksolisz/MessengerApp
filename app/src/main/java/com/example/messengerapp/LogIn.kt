@@ -3,6 +3,7 @@ package com.example.messengerapp
 import MessageStorage
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -24,6 +25,7 @@ class LogIn : AppCompatActivity() {
     private lateinit var edtPassword: EditText
     private lateinit var btnLogin: Button
     private lateinit var btnSignUp: Button
+    private lateinit var btnEraseD: Button
 
     private lateinit var mAuth: FirebaseAuth
 
@@ -36,7 +38,7 @@ class LogIn : AppCompatActivity() {
         supportActionBar?.hide()
 
         //habilitar solo para borrar mensajes locales
-        //MessageStorage.clearAllMessages(this)
+        //
 
 
         mAuth= FirebaseAuth.getInstance() //Intialice firebas Auth
@@ -44,6 +46,7 @@ class LogIn : AppCompatActivity() {
         edtPassword= findViewById(R.id.edt_password)
         btnLogin= findViewById(R.id.btn_login)
         btnSignUp= findViewById(R.id.btn_sign_up)
+        btnEraseD= findViewById(R.id.btn_erase)
 
         btnSignUp.setOnClickListener{
             val intent = Intent (this, SignUp::class.java)
@@ -56,6 +59,12 @@ class LogIn : AppCompatActivity() {
 
 
             login(email, password);
+        }
+
+        btnEraseD.setOnClickListener{
+            //borrar datos locales de conversacion
+            MessageStorage.clearAllMessages(this)
+            Log.d("boton borrar","Coversaciones locales borradas, borra datos de firebase para evitar errores")
         }
     }
 
