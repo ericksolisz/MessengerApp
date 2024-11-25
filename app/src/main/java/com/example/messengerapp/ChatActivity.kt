@@ -31,6 +31,8 @@ class ChatActivity : AppCompatActivity() {
     var receiverRoom: String? = null
     var senderRoom: String? = null
 
+    private val locallySentMessages = mutableSetOf<String>() //
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,7 +41,7 @@ class ChatActivity : AppCompatActivity() {
             val name = intent.getStringExtra("name")
             val receiverUid =  intent.getStringExtra("uid")
 
-            val senderUid = FirebaseAuth.getInstance().currentUser?.uid
+        val senderUid = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
 
 
@@ -65,26 +67,31 @@ class ChatActivity : AppCompatActivity() {
             chatRecyclerView.adapter = messageAdapter
 
             // logic for adding data to recyclerView
-            mDbRef.child("chats").child(senderRoom!!).child("messages")
-                .addValueEventListener(object : ValueEventListener{
-                    override fun onDataChange(snapshot: DataSnapshot) {
+        mDbRef.child("chats").child(senderRoom!!).child("messages")
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    messageList.clear()
 
-                        messageList.clear()
+                    for (postSnapshot in snapshot.children) {
+                        val message = postSnapshot.getValue(Message::class.java)
 
-                        for(postSnapshot in snapshot.children){
-
-                            val message = postSnapshot.getValue(Message::class.java)
-                            messageList.add(message!!)
-
+                        // Solo agregar mensajes que no son enviados por este cliente
+                        if (message != null && message.senderId != senderUid) {
+                            messageList.add(message)
                         }
-                        messageAdapter.notifyDataSetChanged()
-
                     }
 
-                    override fun onCancelled(error: DatabaseError) {
-
+                    // Agregar mensajes enviados locales al final de la lista
+                    val localMessages = MessageStorage.getMessages(this@ChatActivity, senderUid)
+                    localMessages.forEach { localMessage ->
+                        messageList.add(Message(localMessage, senderUid))
                     }
-                })
+
+                    messageAdapter.notifyDataSetChanged()
+                }
+
+                override fun onCancelled(error: DatabaseError) {}
+            })
 
 
             //adding the message to database
@@ -97,22 +104,28 @@ class ChatActivity : AppCompatActivity() {
             sentMessages.add(message)
             MessageStorage.saveMessages(this, uid, sentMessages)
 
-            // Recuperar clave pública del receptor y cifrar el mensaje
+            // Agregar mensaje a la lista y notificar al adaptador
+            val localMessage = Message(message, uid)
+            messageList.add(localMessage)
+            messageAdapter.notifyItemInserted(messageList.size - 1)
+            chatRecyclerView.scrollToPosition(messageList.size - 1)
+
+            // Enviar mensaje cifrado a Firebase
             getPublicKeyOfReceiver(receiverUid!!) { publicKey ->
                 val encryptedMessage = RSAEncryptionUtil.encryptMessage(message, publicKey)
-
-                // Crear el objeto de mensaje cifrado
                 val messageObject = Message(encryptedMessage, senderUid)
 
-                // Guardar el mensaje cifrado en Firebase
                 mDbRef.child("chats").child(senderRoom!!).child("messages").push()
                     .setValue(messageObject).addOnSuccessListener {
                         mDbRef.child("chats").child(receiverRoom!!).child("messages").push()
                             .setValue(messageObject)
                     }
+
                 messageBox.setText("")
             }
         }
+
+
 
 
     }

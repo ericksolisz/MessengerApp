@@ -35,33 +35,29 @@ class MessageAdapter (val context: Context,
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val currentMessage = messageList[position]
 
-        if (holder.javaClass == SentViewHolder::class.java) {
-            val viewHolder = holder as SentViewHolder
-
-            // Mostrar mensaje enviado desde sentMessages
-            if (position < sentMessages.size) {
-                viewHolder.sentMessage.text = sentMessages[position]
-            } else {
-                viewHolder.sentMessage.text = currentMessage.message // Mensaje encriptado como respaldo
+        if (holder is SentViewHolder) {
+            // Mostrar mensajes enviados locales
+            if (currentMessage.senderId == currentUserUid) {
+                holder.sentMessage.text = currentMessage.message
             }
-        } else {
-            val viewHolder = holder as ReceiveViewHolder
-
+        } else if (holder is ReceiveViewHolder) {
             // Desencriptar mensajes recibidos
             val privateKeyString = KeyStorage.getPrivateKey(context, currentUserUid)
             if (privateKeyString != null) {
                 val privateKey = RSAUtils.getPrivateKeyFromString(privateKeyString)
                 try {
-                    val decryptedMessage = RSAEncryptionUtil.decryptMessage(currentMessage.message!!, privateKey)
-                    viewHolder.receiveMessage.text = decryptedMessage
+                    val decryptedMessage =
+                        RSAEncryptionUtil.decryptMessage(currentMessage.message!!, privateKey)
+                    holder.receiveMessage.text = decryptedMessage
                 } catch (e: Exception) {
-                    viewHolder.receiveMessage.text = currentMessage.message // Mensaje cifrado como respaldo
+                    holder.receiveMessage.text = currentMessage.message
                 }
             } else {
-                viewHolder.receiveMessage.text = currentMessage.message // Mensaje cifrado como respaldo
+                holder.receiveMessage.text = currentMessage.message
             }
         }
     }
+
 
 
 

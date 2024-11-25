@@ -17,6 +17,7 @@
         />
 
 
+
     <LinearLayout
         android:id="@+id/linearLayout"
         android:layout_alignParentBottom="true"
@@ -25,6 +26,9 @@
         android:orientation="horizontal"
         android:layout_marginBottom="5dp"
         android:weightSum="100">
+
+
+
 
         <EditText
             android:id="@+id/messageBox"
@@ -42,6 +46,10 @@
             android:layout_height="50dp"
             android:src="@drawable/enviar_mensaje"
             android:layout_weight="20"/>
+
+
+
+
     </LinearLayout>
 
 </RelativeLayout>

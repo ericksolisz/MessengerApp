@@ -1,5 +1,6 @@
 package com.example.messengerapp
 
+import MessageStorage
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
@@ -34,6 +35,9 @@ class LogIn : AppCompatActivity() {
 
         supportActionBar?.hide()
 
+        //habilitar solo para borrar mensajes locales
+        //MessageStorage.clearAllMessages(this)
+
 
         mAuth= FirebaseAuth.getInstance() //Intialice firebas Auth
         edtEmail= findViewById(R.id.edt_email)
@@ -65,6 +69,9 @@ class LogIn : AppCompatActivity() {
 
                     // Recuperar mensajes enviados del usuario
                     val sentMessages = MessageStorage.getMessages(this, uid)
+
+
+
 
 
                     if (privateKeyString == null) {

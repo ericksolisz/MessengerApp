@@ -24,4 +24,16 @@ object MessageStorage {
             emptyList() // Retornar lista vacía si no hay mensajes guardados
         }
     }
+
+    // Borrar mensajes locales de un UID específico
+    fun clearMessagesForUser(context: Context, uid: String) {
+        val sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        sharedPreferences.edit().remove(uid).apply()
+    }
+
+    // Borrar todos los mensajes locales
+    fun clearAllMessages(context: Context) {
+        val sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        sharedPreferences.edit().clear().apply()
+    }
 }
