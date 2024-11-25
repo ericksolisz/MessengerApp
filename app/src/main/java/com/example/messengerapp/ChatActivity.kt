@@ -40,6 +40,9 @@ class ChatActivity : AppCompatActivity() {
             val receiverUid =  intent.getStringExtra("uid")
 
             val senderUid = FirebaseAuth.getInstance().currentUser?.uid
+
+
+
             mDbRef = FirebaseDatabase.getInstance().getReference()
 
             senderRoom = receiverUid + senderUid
@@ -51,9 +54,14 @@ class ChatActivity : AppCompatActivity() {
             messageBox =  findViewById(R.id.messageBox)
             sendButton = findViewById(R.id.sendButton)
             messageList = ArrayList()
-            messageAdapter = MessageAdapter(this,messageList)
 
-            chatRecyclerView.layoutManager = LinearLayoutManager(this)
+            val sentMessages = MessageStorage.getMessages(this, senderUid)
+
+
+        messageAdapter = MessageAdapter(this, messageList, FirebaseAuth.getInstance().currentUser?.uid!!, sentMessages)
+
+
+        chatRecyclerView.layoutManager = LinearLayoutManager(this)
             chatRecyclerView.adapter = messageAdapter
 
             // logic for adding data to recyclerView
@@ -83,12 +91,17 @@ class ChatActivity : AppCompatActivity() {
         sendButton.setOnClickListener {
             val message = messageBox.text.toString()
 
-            // Recuperar clave pública del receptor desde Firebase
+            // Guardar mensaje enviado localmente
+            val uid = FirebaseAuth.getInstance().currentUser?.uid!!
+            val sentMessages = MessageStorage.getMessages(this, uid).toMutableList()
+            sentMessages.add(message)
+            MessageStorage.saveMessages(this, uid, sentMessages)
+
+            // Recuperar clave pública del receptor y cifrar el mensaje
             getPublicKeyOfReceiver(receiverUid!!) { publicKey ->
-                // Cifrar el mensaje usando la clave pública del receptor
                 val encryptedMessage = RSAEncryptionUtil.encryptMessage(message, publicKey)
 
-                // Crear el objeto de mensaje con el mensaje cifrado
+                // Crear el objeto de mensaje cifrado
                 val messageObject = Message(encryptedMessage, senderUid)
 
                 // Guardar el mensaje cifrado en Firebase
@@ -100,6 +113,7 @@ class ChatActivity : AppCompatActivity() {
                 messageBox.setText("")
             }
         }
+
 
     }
 

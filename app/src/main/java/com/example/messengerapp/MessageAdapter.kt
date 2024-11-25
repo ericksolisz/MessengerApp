@@ -9,7 +9,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
 
 
-class MessageAdapter (val context: Context, val messageList: ArrayList<Message>):
+class MessageAdapter (val context: Context,
+                      val messageList: ArrayList<Message>,
+                      val currentUserUid: String,
+                      val sentMessages: List<String>):
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     val ITEM_RECEIVE = 1;
@@ -30,50 +33,43 @@ class MessageAdapter (val context: Context, val messageList: ArrayList<Message>)
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-
         val currentMessage = messageList[position]
 
         if (holder.javaClass == SentViewHolder::class.java) {
-            // Lógica para mensajes enviados
             val viewHolder = holder as SentViewHolder
 
-            // Descifrar mensaje antes de mostrarlo
-            val privateKeyString = KeyStorage.getPrivateKey(context) // Recuperar clave privada localmente
-            if (privateKeyString != null) {
-                val privateKey = RSAUtils.getPrivateKeyFromString(privateKeyString)
-                try {
-                    val decryptedMessage = RSAEncryptionUtil.decryptMessage(currentMessage.message!!, privateKey)
-                    viewHolder.sentMessage.text = decryptedMessage
-                } catch (e: Exception) {
-                    // En caso de error al descifrar, muestra el mensaje cifrado
-                    viewHolder.sentMessage.text = currentMessage.message
-                }
+            // Mostrar mensaje enviado desde sentMessages
+            if (position < sentMessages.size) {
+                viewHolder.sentMessage.text = sentMessages[position]
             } else {
-                // Si no se encuentra la clave privada, muestra el mensaje cifrado
-                viewHolder.sentMessage.text = currentMessage.message
+                viewHolder.sentMessage.text = currentMessage.message // Mensaje encriptado como respaldo
             }
-
         } else {
-            // Lógica para mensajes recibidos
             val viewHolder = holder as ReceiveViewHolder
 
-            // Descifrar mensaje antes de mostrarlo
-            val privateKeyString = KeyStorage.getPrivateKey(context) // Recuperar clave privada localmente
+            // Desencriptar mensajes recibidos
+            val privateKeyString = KeyStorage.getPrivateKey(context, currentUserUid)
             if (privateKeyString != null) {
                 val privateKey = RSAUtils.getPrivateKeyFromString(privateKeyString)
                 try {
                     val decryptedMessage = RSAEncryptionUtil.decryptMessage(currentMessage.message!!, privateKey)
                     viewHolder.receiveMessage.text = decryptedMessage
                 } catch (e: Exception) {
-                    // En caso de error al descifrar, muestra el mensaje cifrado
-                    viewHolder.receiveMessage.text = currentMessage.message
+                    viewHolder.receiveMessage.text = currentMessage.message // Mensaje cifrado como respaldo
                 }
             } else {
-                // Si no se encuentra la clave privada, muestra el mensaje cifrado
-                viewHolder.receiveMessage.text = currentMessage.message
+                viewHolder.receiveMessage.text = currentMessage.message // Mensaje cifrado como respaldo
             }
         }
     }
+
+
+
+
+
+
+
+
 
 
     override fun getItemViewType(position: Int): Int {

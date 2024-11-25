@@ -89,7 +89,8 @@ class SignUp : AppCompatActivity() {
 
 
         // Guardar la clave privada localmente en el dispositivo
-        KeyStorage.savePrivateKey(this, privateKeyString)
+        KeyStorage.savePrivateKey(this, uid, privateKeyString)
+
 
 
     }

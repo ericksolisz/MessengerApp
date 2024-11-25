@@ -55,23 +55,32 @@ class LogIn : AppCompatActivity() {
         }
     }
 
-    private fun login(email: String, password: String){
-        ///logic for login (firebase doc)
+    private fun login(email: String, password: String) {
         mAuth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    // Sign in success, update UI with the signed-in user's information
-                    val intent = Intent(this@LogIn, MainActivity::class.java)
-                    finish()
-                    startActivity(intent)
+                    // Recuperar clave privada del usuario actual
+                    val uid = FirebaseAuth.getInstance().currentUser?.uid!!
+                    val privateKeyString = KeyStorage.getPrivateKey(this, uid)
 
+                    // Recuperar mensajes enviados del usuario
+                    val sentMessages = MessageStorage.getMessages(this, uid)
+
+
+                    if (privateKeyString == null) {
+                        Toast.makeText(this, "Clave privada no encontrada para este usuario.", Toast.LENGTH_SHORT).show()
+                    } else {
+                        // Continuar con la navegación a la pantalla principal
+                        val intent = Intent(this@LogIn, MainActivity::class.java)
+                        finish()
+                        startActivity(intent)
+                    }
                 } else {
-                    // If sign in fails, display a message to the user.
-                    Toast.makeText(this@LogIn, "User does not exist", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "User does not exist", Toast.LENGTH_SHORT).show()
                 }
             }
-
     }
+
 }
 
 
