@@ -64,7 +64,7 @@ class LogIn : AppCompatActivity() {
         btnEraseD.setOnClickListener{
             //borrar datos locales de conversacion
             MessageStorage.clearAllMessages(this)
-            Log.d("boton borrar","Coversaciones locales borradas, borra datos de firebase para evitar errores")
+            Log.d("boton borrar","Coversaciones locales borradas, borre datos de firebase para evitar errores")
         }
     }
 

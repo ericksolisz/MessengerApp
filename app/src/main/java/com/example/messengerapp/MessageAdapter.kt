@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
+import java.security.interfaces.RSAPrivateCrtKey
 
 
 class MessageAdapter (val context: Context,
@@ -41,22 +42,54 @@ class MessageAdapter (val context: Context,
                 holder.sentMessage.text = currentMessage.message
             }
         } else if (holder is ReceiveViewHolder) {
-            // Desencriptar mensajes recibidos
+            // Obtener la clave privada del usuario actual
             val privateKeyString = KeyStorage.getPrivateKey(context, currentUserUid)
             if (privateKeyString != null) {
                 val privateKey = RSAUtils.getPrivateKeyFromString(privateKeyString)
+
                 try {
-                    val decryptedMessage =
+                    // Desencriptar usando RSA estándar
+                    val startStandard = System.nanoTime()
+                    val decryptedMessageStandard =
                         RSAEncryptionUtil.decryptMessage(currentMessage.message!!, privateKey)
-                    holder.receiveMessage.text = decryptedMessage
+                    val endStandard = System.nanoTime()
+                    val timeStandard = endStandard - startStandard
+
+                    // Registrar el tiempo de descifrado estándar
+                    println("RSA Standard decryption time: $timeStandard ns")
+
+                    // Desencriptar usando RSA-CRT
+                    if (privateKey is java.security.interfaces.RSAPrivateCrtKey) {
+                        val startCRT = System.nanoTime()
+                        val decryptedMessageCRT = RSADecryptCRTUtil.decryptMessageWithCRT(
+                            currentMessage.message!!,
+                            privateKey
+                        )
+                        val endCRT = System.nanoTime()
+                        val timeCRT = endCRT - startCRT
+
+                        // Registrar el tiempo de descifrado CRT
+                        println("RSA-CRT decryption time: $timeCRT ns")
+                    } else {
+                        println("Private key is not RSAPrivateCrtKey, skipping CRT decryption.")
+                    }
+
+                    // Mostrar solo el mensaje desencriptado estándar en la app
+                    holder.receiveMessage.text = decryptedMessageStandard
+
                 } catch (e: Exception) {
+                    // Si hay un error, mostrar el mensaje cifrado como respaldo
                     holder.receiveMessage.text = currentMessage.message
+                    println("Error during decryption: ${e.message}")
                 }
             } else {
+                // Si no se encuentra la clave privada, mostrar el mensaje cifrado
                 holder.receiveMessage.text = currentMessage.message
+                println("Private key not found for user.")
             }
         }
     }
+
 
 
 
